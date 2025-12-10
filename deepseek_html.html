@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact Calculator Suite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.5;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .calculator-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .calc-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .calc-btn.active {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .calc-btn:hover:not(.active) {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+        
+        .calculator-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .calculator-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .calculator-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calculator-title i {
+            color: #3498db;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .input-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.9rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 1rem;
+            display: none;
+        }
+        
+        .result.active {
+            display: block;
+        }
+        
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        
+        .result-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .highlight {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            padding: 10px 16px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #7f8c8d 0%, #616a6b 100%);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .calculator-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .rate-formula {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            border-left: 3px solid #3498db;
+        }
+        
+        .rate-formula strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> Compact Calculator Suite</h1>
+            <p class="subtitle">Percentage Change, Percentage, GST & Weight Rate Calculator</p>
+        </header>
+        
+        <div class="calculator-selector">
+            <button class="calc-btn active" data-target="percentage-change">
+                <i class="fas fa-chart-line"></i> % Change
+            </button>
+            <button class="calc-btn" data-target="percentage-calc">
+                <i class="fas fa-percentage"></i> Percentage
+            </button>
+            <button class="calc-btn" data-target="gst-calc">
+                <i class="fas fa-receipt"></i> GST
+            </button>
+            <button class="calc-btn" data-target="weight-rate-calc">
+                <i class="fas fa-weight"></i> Weight Rate
+            </button>
+        </div>
+        
+        <!-- Percentage Change Calculator -->
+        <div class="calculator-section active" id="percentage-change">
+            <h2 class="calculator-title"><i class="fas fa-chart-line"></i> Percentage Change Calculator</h2>
+            <p style="margin-bottom: 15px; color: #666;">Calculate percentage increase/decrease from one value to another.</p>
+            
+            <div class="input-group">
+                <label for="original-value">Original Value</label>
+                <input type="number" id="original-value" placeholder="Enter original value (e.g., 100)">
+            </div>
+            
+            <div class="input-group">
+                <label for="new-value">New Value</label>
+                <input type="number" id="new-value" placeholder="Enter new value (e.g., 150)">
+            </div>
+            
+            <button id="calculate-change">Calculate Percentage Change</button>
+            
+            <div class="result" id="change-result">
+                <div class="result-value" id="change-result-value">50% increase</div>
+                <div class="result-details" id="change-details">150 is 50% greater than 100.</div>
+            </div>
+        </div>
+        
+        <!-- Basic Percentage Calculator -->
+        <div class="calculator-section" id="percentage-calc">
+            <h2 class="calculator-title"><i class="fas fa-percentage"></i> Percentage Calculator</h2>
+            <p style="margin-bottom: 15px; color: #666;">What is X% of Y?</p>
+            
+            <div class="input-group">
+                <label for="percentage">Percentage (%)</label>
+                <input type="number" id="percentage" placeholder="Enter percentage (e.g., 25)">
+            </div>
+            
+            <div class="input-group">
+                <label for="number">Number</label>
+                <input type="number" id="number" placeholder="Enter number (e.g., 200)">
+            </div>
+            
+            <button id="calculate-basic">Calculate</button>
+            
+            <div class="result" id="basic-result">
+                <div class="result-value" id="basic-result-value">25% of 200 = 50</div>
+                <div class="result-details" id="basic-details">25% of 200 equals 50.</div>
+            </div>
+        </div>
+        
+        <!-- GST Calculator -->
+        <div class="calculator-section" id="gst-calc">
+            <h2 class="calculator-title"><i class="fas fa-receipt"></i> GST Calculator</h2>
+            <p style="margin-bottom: 15px; color: #666;">Calculate Goods and Services Tax (GST).</p>
+            
+            <div class="input-group">
+                <label for="amount-before-gst">Amount (Before GST)</label>
+                <input type="number" id="amount-before-gst" placeholder="Enter amount (e.g., 1000)">
+            </div>
+            
+            <div class="input-group">
+                <label for="gst-rate">GST Rate (%)</label>
+                <select id="gst-rate">
+                    <option value="5">5%</option>
+                    <option value="12" selected>12%</option>
+                    <option value="18">18%</option>
+                    <option value="28">28%</option>
+                    <option value="custom">Custom %</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="custom-gst-rate-container" style="display: none;">
+                <label for="custom-gst-rate">Custom GST Rate (%)</label>
+                <input type="number" id="custom-gst-rate" placeholder="Enter custom rate">
+            </div>
+            
+            <button id="calculate-gst">Calculate GST</button>
+            
+            <div class="result" id="gst-result">
+                <div class="result-value" id="gst-result-value">GST: ₹120 | Total: ₹1120</div>
+                <div class="result-details" id="gst-details">GST on ₹1000 at 12% is ₹120. Total amount is ₹1120.</div>
+            </div>
+        </div>
+        
+        <!-- Weight Rate Calculator -->
+        <div class="calculator-section" id="weight-rate-calc">
+            <h2 class="calculator-title"><i class="fas fa-weight"></i> Weight Rate Calculator</h2>
+            <p style="margin-bottom: 15px; color: #666;">Calculate price per kilogram and total cost for any weight.</p>
+            
+            <div class="rate-formula">
+                <strong>Formula:</strong> Price per kg = Total Price ÷ Weight in kg<br>
+                <strong>Total Cost =</strong> Price per kg × Weight in kg
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="total-price">Total Price (₹)</label>
+                    <input type="number" id="total-price" placeholder="Enter total price" value="500">
+                </div>
+                
+                <div class="input-group">
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" placeholder="Enter weight" value="5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="weight-unit">Weight Unit</label>
+                    <select id="weight-unit">
+                        <option value="kg" selected>Kilograms (kg)</option>
+                        <option value="g">Grams (g)</option>
+                        <option value="lb">Pounds (lb)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="price-per-kg">Price per kg (₹)</label>
+                    <input type="number" id="price-per-kg" placeholder="Or enter price per kg">
+                </div>
+                
+                <div class="input-group">
+                    <label for="calculate-weight">Calculate For Weight</label>
+                    <input type="number" id="calculate-weight" placeholder="Weight to calculate" value="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="calculate-unit">Unit</label>
+                    <select id="calculate-unit">
+                        <option value="kg" selected>Kilograms (kg)</option>
+                        <option value="g">Grams (g)</option>
+                        <option value="lb">Pounds (lb)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="calculate-rate-per-kg" style="flex: 1;">
+                    <i class="fas fa-calculator"></i> Calculate Rate per kg
+                </button>
+                <button id="calculate-total-cost" style="flex: 1;">
+                    <i class="fas fa-shopping-cart"></i> Calculate Total Cost
+                </button>
+            </div>
+            
+            <div class="result" id="weight-rate-result">
+                <div class="result-value" id="weight-rate-result-value">Rate: ₹100 per kg</div>
+                <div class="result-details" id="weight-rate-details">
+                    For 5 kg at ₹500 total price.<br>
+                    Price per kg = ₹500 ÷ 5 = ₹100
+                </div>
+            </div>
+        </div>
+        
+        <button class="reset-btn" id="reset-all">
+            <i class="fas fa-redo-alt"></i> Reset All Calculators
+        </button>
+        
+        <footer>
+            <p>Compact Calculator Suite &copy; <span id="current-year">2023</span> | Quick calculations for daily use</p>
+        </footer>
+    </div>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Calculator navigation
+        const calculatorBtns = document.querySelectorAll('.calc-btn');
+        const calculatorSections = document.querySelectorAll('.calculator-section');
+        
+        calculatorBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                
+                // Update active button
+                calculatorBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show target section
+                calculatorSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetId).classList.add('active');
+                
+                // Reset all results
+                document.querySelectorAll('.result').forEach(result => {
+                    result.classList.remove('active');
+                });
+            });
+        });
+        
+        // Percentage Change Calculator
+        document.getElementById('calculate-change').addEventListener('click', function() {
+            const originalValue = parseFloat(document.getElementById('original-value').value);
+            const newValue = parseFloat(document.getElementById('new-value').value);
+            const resultElement = document.getElementById('change-result');
+            const resultValueElement = document.getElementById('change-result-value');
+            const detailsElement = document.getElementById('change-details');
+            
+            if (isNaN(originalValue) || isNaN(newValue)) {
+                resultValueElement.textContent = "Please enter valid numbers";
+                detailsElement.textContent = "Both fields are required.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            if (originalValue === 0) {
+                resultValueElement.textContent = "Original value cannot be zero";
+                detailsElement.textContent = "Please enter a non-zero original value.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            const change = newValue - originalValue;
+            const percentageChange = (change / originalValue) * 100;
+            const formattedChange = Math.abs(percentageChange).toFixed(2).replace(/\.00$/, '');
+            
+            if (percentageChange > 0) {
+                resultValueElement.textContent = `${formattedChange}% increase`;
+                detailsElement.textContent = `${newValue} is ${formattedChange}% greater than ${originalValue}.`;
+            } else if (percentageChange < 0) {
+                resultValueElement.textContent = `${formattedChange}% decrease`;
+                detailsElement.textContent = `${newValue} is ${formattedChange}% less than ${originalValue}.`;
+            } else {
+                resultValueElement.textContent = `No change (0%)`;
+                detailsElement.textContent = `${newValue} is the same as ${originalValue}.`;
+            }
+            
+            resultElement.classList.add('active');
+        });
+        
+        // Basic Percentage Calculator
+        document.getElementById('calculate-basic').addEventListener('click', function() {
+            const percentage = parseFloat(document.getElementById('percentage').value);
+            const number = parseFloat(document.getElementById('number').value);
+            const resultElement = document.getElementById('basic-result');
+            const resultValueElement = document.getElementById('basic-result-value');
+            const detailsElement = document.getElementById('basic-details');
+            
+            if (isNaN(percentage) || isNaN(number)) {
+                resultValueElement.textContent = "Please enter valid numbers";
+                detailsElement.textContent = "Both fields are required.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            const result = (percentage / 100) * number;
+            const formattedResult = result.toFixed(2).replace(/\.00$/, '');
+            
+            resultValueElement.textContent = `${percentage}% of ${number} = ${formattedResult}`;
+            detailsElement.textContent = `${percentage}% of ${number} equals ${formattedResult}.`;
+            resultElement.classList.add('active');
+        });
+        
+        // GST Calculator
+        const gstRateSelect = document.getElementById('gst-rate');
+        const customGstContainer = document.getElementById('custom-gst-rate-container');
+        
+        gstRateSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customGstContainer.style.display = 'block';
+            } else {
+                customGstContainer.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('calculate-gst').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('amount-before-gst').value);
+            const gstRateSelect = document.getElementById('gst-rate');
+            const selectedRate = gstRateSelect.value;
+            
+            let gstRate;
+            if (selectedRate === 'custom') {
+                gstRate = parseFloat(document.getElementById('custom-gst-rate').value);
+            } else {
+                gstRate = parseFloat(selectedRate);
+            }
+            
+            const resultElement = document.getElementById('gst-result');
+            const resultValueElement = document.getElementById('gst-result-value');
+            const detailsElement = document.getElementById('gst-details');
+            
+            if (isNaN(amount) || isNaN(gstRate) || gstRate < 0) {
+                resultValueElement.textContent = "Please enter valid values";
+                detailsElement.textContent = "Amount must be a number and GST rate must be a positive number.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            const gstAmount = (amount * gstRate) / 100;
+            const totalAmount = amount + gstAmount;
+            
+            const formattedGst = gstAmount.toFixed(2).replace(/\.00$/, '');
+            const formattedTotal = totalAmount.toFixed(2).replace(/\.00$/, '');
+            
+            resultValueElement.textContent = `GST: ₹${formattedGst} | Total: ₹${formattedTotal}`;
+            detailsElement.textContent = `GST on ₹${amount} at ${gstRate}% is ₹${formattedGst}. Total amount is ₹${formattedTotal}.`;
+            resultElement.classList.add('active');
+        });
+        
+        // Weight Rate Calculator
+        // Convert weight to kilograms
+        function convertToKg(weight, unit) {
+            switch(unit) {
+                case 'kg':
+                    return weight;
+                case 'g':
+                    return weight / 1000;
+                case 'lb':
+                    return weight * 0.453592;
+                default:
+                    return weight;
+            }
+        }
+        
+        // Format weight with unit
+        function formatWeight(weight, unit) {
+            return `${weight} ${unit}`;
+        }
+        
+        // Calculate rate per kg
+        document.getElementById('calculate-rate-per-kg').addEventListener('click', function() {
+            const totalPrice = parseFloat(document.getElementById('total-price').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const weightUnit = document.getElementById('weight-unit').value;
+            
+            const resultElement = document.getElementById('weight-rate-result');
+            const resultValueElement = document.getElementById('weight-rate-result-value');
+            const detailsElement = document.getElementById('weight-rate-details');
+            
+            if (isNaN(totalPrice) || isNaN(weight) || weight <= 0) {
+                resultValueElement.textContent = "Please enter valid values";
+                detailsElement.textContent = "Total price and weight must be positive numbers.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            // Convert weight to kg
+            const weightInKg = convertToKg(weight, weightUnit);
+            
+            // Calculate price per kg
+            const pricePerKg = totalPrice / weightInKg;
+            const formattedPricePerKg = pricePerKg.toFixed(2).replace(/\.00$/, '');
+            
+            resultValueElement.textContent = `Rate: ₹${formattedPricePerKg} per kg`;
+            detailsElement.innerHTML = `
+                For ${formatWeight(weight, weightUnit)} at ₹${totalPrice} total price.<br>
+                Price per kg = ₹${totalPrice} ÷ ${weightInKg.toFixed(3)} kg = ₹${formattedPricePerKg}<br>
+                <br>
+                <strong>At this rate:</strong><br>
+                • 1 kg = ₹${formattedPricePerKg}<br>
+                • 100 g = ₹${(pricePerKg * 0.1).toFixed(2)}<br>
+                • 500 g = ₹${(pricePerKg * 0.5).toFixed(2)}<br>
+                • 2 kg = ₹${(pricePerKg * 2).toFixed(2)}
+            `;
+            
+            // Also update the price per kg input field
+            document.getElementById('price-per-kg').value = formattedPricePerKg;
+            
+            resultElement.classList.add('active');
+        });
+        
+        // Calculate total cost
+        document.getElementById('calculate-total-cost').addEventListener('click', function() {
+            const pricePerKg = parseFloat(document.getElementById('price-per-kg').value);
+            const calculateWeight = parseFloat(document.getElementById('calculate-weight').value);
+            const calculateUnit = document.getElementById('calculate-unit').value;
+            
+            const resultElement = document.getElementById('weight-rate-result');
+            const resultValueElement = document.getElementById('weight-rate-result-value');
+            const detailsElement = document.getElementById('weight-rate-details');
+            
+            if (isNaN(pricePerKg) || isNaN(calculateWeight) || pricePerKg <= 0 || calculateWeight <= 0) {
+                resultValueElement.textContent = "Please enter valid values";
+                detailsElement.textContent = "Price per kg and weight must be positive numbers.";
+                resultElement.classList.add('active');
+                return;
+            }
+            
+            // Convert weight to kg
+            const weightInKg = convertToKg(calculateWeight, calculateUnit);
+            
+            // Calculate total cost
+            const totalCost = pricePerKg * weightInKg;
+            const formattedTotalCost = totalCost.toFixed(2).replace(/\.00$/, '');
+            
+            resultValueElement.textContent = `Total Cost: ₹${formattedTotalCost}`;
+            detailsElement.innerHTML = `
+                For ${formatWeight(calculateWeight, calculateUnit)} at ₹${pricePerKg} per kg.<br>
+                Total Cost = ₹${pricePerKg} × ${weightInKg.toFixed(3)} kg = ₹${formattedTotalCost}<br>
+                <br>
+                <strong>Breakdown:</strong><br>
+                • ${formatWeight(calculateWeight, calculateUnit)} = ${weightInKg.toFixed(3)} kg<br>
+                • Price per kg = ₹${pricePerKg}<br>
+                • Total = ₹${formattedTotalCost}
+            `;
+            
+            resultElement.classList.add('active');
+        });
+        
+        // Auto-calculate rate per kg when price per kg is entered manually
+        document.getElementById('price-per-kg').addEventListener('input', function() {
+            if (this.value && this.value.trim() !== '') {
+                // Update the total price field if weight is available
+                const weight = parseFloat(document.getElementById('weight').value);
+                const weightUnit = document.getElementById('weight-unit').value;
+                const pricePerKg = parseFloat(this.value);
+                
+                if (!isNaN(weight) && !isNaN(pricePerKg) && weight > 0) {
+                    const weightInKg = convertToKg(weight, weightUnit);
+                    const totalPrice = pricePerKg * weightInKg;
+                    document.getElementById('total-price').value = totalPrice.toFixed(2);
+                }
+            }
+        });
+        
+        // Reset all calculators
+        document.getElementById('reset-all').addEventListener('click', function() {
+            // Clear all inputs
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset dropdowns to defaults
+            document.getElementById('gst-rate').value = '12';
+            document.getElementById('custom-gst-rate-container').style.display = 'none';
+            document.getElementById('weight-unit').value = 'kg';
+            document.getElementById('calculate-unit').value = 'kg';
+            
+            // Set default values
+            document.getElementById('original-value').value = '100';
+            document.getElementById('new-value').value = '150';
+            document.getElementById('percentage').value = '25';
+            document.getElementById('number').value = '200';
+            document.getElementById('amount-before-gst').value = '1000';
+            document.getElementById('total-price').value = '500';
+            document.getElementById('weight').value = '5';
+            document.getElementById('calculate-weight').value = '1';
+            
+            // Hide all results
+            document.querySelectorAll('.result').forEach(result => {
+                result.classList.remove('active');
+            });
+            
+            // Show first calculator
+            calculatorBtns.forEach(btn => btn.classList.remove('active'));
+            calculatorSections.forEach(section => section.classList.remove('active'));
+            
+            document.querySelector('[data-target="percentage-change"]').classList.add('active');
+            document.getElementById('percentage-change').classList.add('active');
+        });
+        
+        // Enter key support for inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const activeSection = document.querySelector('.calculator-section.active');
+                    if (activeSection.id === 'weight-rate-calc') {
+                        // For weight calculator, use the first calculate button
+                        document.getElementById('calculate-rate-per-kg').click();
+                    } else {
+                        const calculateBtn = activeSection.querySelector('button');
+                        calculateBtn.click();
+                    }
+                }
+            });
+        });
+        
+        // Initialize with default values
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('original-value').value = '100';
+            document.getElementById('new-value').value = '150';
+            document.getElementById('percentage').value = '25';
+            document.getElementById('number').value = '200';
+            document.getElementById('amount-before-gst').value = '1000';
+            document.getElementById('total-price').value = '500';
+            document.getElementById('weight').value = '5';
+            document.getElementById('calculate-weight').value = '1';
+            
+            // Calculate initial weight rate
+            document.getElementById('calculate-rate-per-kg').click();
+        });
+    </script>
+</body>
+</html>
